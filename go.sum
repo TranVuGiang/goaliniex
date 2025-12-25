@@ -1,0 +1,6 @@
+github.com/andyle182810/gframework v0.0.3 h1:pA2mHu2TGwBZdWTzAxig5OQoI+0yBIhPGR1VBDLKREU=
+github.com/andyle182810/gframework v0.0.3/go.mod h1:tUfYHcVcYUoJUXsG4aN2dyF2aJ8r17WQ7DnwzU6MYuM=
+golang.org/x/net v0.43.0 h1:lat02VYK2j4aLzMzecihNvTlJNQUq316m2Mr9rnM6YE=
+golang.org/x/net v0.43.0/go.mod h1:vhO1fvI4dGsIjh73sWfUVjj3N7CA9WkKJNQm2svM6Jg=
+resty.dev/v3 v3.0.0-beta.5 h1:NV1xbqOLzSq7XMTs1t/HLPvu7xrxoXzF90SR4OO6faQ=
+resty.dev/v3 v3.0.0-beta.5/go.mod h1:NTOerrC/4T7/FE6tXIZGIysXXBdgNqwMZuKtxpea9NM=
