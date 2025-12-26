@@ -54,9 +54,9 @@ type KYCRequestBody struct {
 }
 
 func (h *SubmitKYCHandle) SubmitKYC(ctx context.Context, req *SubmitKYCRequest) (*AlixResponse, error) {
-	targetURL := h.cfg.BaseURL + "/api/v2/user/submit-kyc"
+	targetURL := h.cfg.BaseURL + "/user/submit-kyc"
 
-	payload := h.cfg.PartnerCode + req.UserEmail + req.Nationality + h.cfg.SecretKey
+	payload := fmt.Sprintf("%s|%s|%s|%s", h.cfg.PartnerCode, req.UserEmail, req.Nationality, h.cfg.SecretKey)
 
 	sig, err := signature.SignPayload(payload, h.cfg.PrivateKey)
 	if err != nil {

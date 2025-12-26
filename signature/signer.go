@@ -11,8 +11,8 @@ import (
 	"errors"
 )
 
-func SignPayload(payload string, privateKey string) (string, error) {
-	block, _ := pem.Decode([]byte(privateKey))
+func SignPayload(payload string, privateKey []byte) (string, error) {
+	block, _ := pem.Decode(privateKey)
 	if block == nil {
 		return "", errors.New("invalid private key PEM")
 	}

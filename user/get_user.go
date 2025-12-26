@@ -12,10 +12,6 @@ import (
 
 var ErrGetUserFromAlix = errors.New("failed to get user from alix")
 
-type GetUserAlixRequest struct {
-	UserEmail string `json:"userEmail"`
-}
-
 type UserAlixResponse struct {
 	Success   bool          `json:"success"`
 	Message   string        `json:"message"`
@@ -43,21 +39,25 @@ type UserAlixData struct {
 	RejectReason     string `json:"rejectReason"`
 }
 
-func (h *GetUserAlixHandle) GetUserInfo(ctx context.Context, req *GetUserAlixRequest) (*UserAlixResponse, error) {
-	targetURL := h.cfg.BaseURL + "/api/v2/user/get-kyc-information"
+func (h *GetUserAlixHandle) GetUserInfo(ctx context.Context, userEmail string) (*UserAlixResponse, error) {
+	targetURL := h.cfg.BaseURL + "/user/get-kyc-information"
 
-	payload := h.cfg.PartnerCode + req.UserEmail + h.cfg.SecretKey
+	payload := fmt.Sprintf("%s|%s|%s", h.cfg.PartnerCode, userEmail, h.cfg.SecretKey)
+
+	fmt.Println("PAYLOAD: ", payload)
 
 	sig, err := signature.SignPayload(payload, h.cfg.PrivateKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to sign payload: %w", err)
 	}
 
+	fmt.Println("SIGNATURE: ", sig)
+
 	var respBody UserAlixResponse
 
 	requestBody := map[string]any{
 		"partnerCode": h.cfg.PartnerCode,
-		"userEmail":   req.UserEmail,
+		"userEmail":   userEmail,
 		"signature":   sig,
 	}
 
@@ -75,6 +75,8 @@ func (h *GetUserAlixHandle) GetUserInfo(ctx context.Context, req *GetUserAlixReq
 
 		return nil, fmt.Errorf("%w: %+v", ErrGetUserFromAlix, respBody)
 	}
+
+	fmt.Println("Response: ", respBody)
 
 	return &respBody, nil
 }

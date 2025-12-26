@@ -1,6 +1,7 @@
 package goaliniex
 
 import (
+	"context"
 	"time"
 
 	"github.com/TranVuGiang/goaliniex/config"
@@ -13,19 +14,21 @@ type Client struct {
 	restyClient *resty.Client
 }
 
-func NewClient(cfg *config.Config) *Client {
+func NewAlixClient(cfg *config.Config) *Client {
 	return &Client{
 		cfg:         cfg,
 		restyClient: newRestyClient(cfg),
 	}
 }
 
-func (c *Client) NewSubmitKYCHandle() *user.SubmitKYCHandle {
-	return user.NewSubmitKYCHandle(c.cfg, c.restyClient)
+func (c *Client) SubmitKYC(ctx context.Context, req *user.SubmitKYCRequest) (*user.AlixResponse, error) {
+	handle := user.NewSubmitKYCHandle(c.cfg, c.restyClient)
+	return handle.SubmitKYC(ctx, req)
 }
 
-func (c *Client) NewUserAlixHandle() *user.GetUserAlixHandle {
-	return user.NewGetUserAlixHandle(c.cfg, c.restyClient)
+func (c *Client) GetUserInfo(ctx context.Context, userEmail string) (*user.UserAlixResponse, error) {
+	handle := user.NewGetUserAlixHandle(c.cfg, c.restyClient)
+	return handle.GetUserInfo(ctx, userEmail)
 }
 
 func newRestyClient(cfg *config.Config) *resty.Client {
