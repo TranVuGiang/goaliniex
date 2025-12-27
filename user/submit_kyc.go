@@ -13,26 +13,26 @@ import (
 var ErrSubmitKYCToAlix = errors.New("failed to submit kyc to alix")
 
 type SubmitKYCRequest struct {
-	UserEmail        string  `json:"userEmail"`
-	FirstName        string  `json:"firstName"`
-	LastName         string  `json:"lastName"`
-	DateOfBirth      string  `json:"dateOfBirth"`
-	Gender           string  `json:"gender"` // "male" | "female"
-	Nationality      string  `json:"nationality"`
-	Type             string  `json:"type"` // "ID_CARD" | "PASSPORT"
-	NationalID       string  `json:"nationalId"`
-	IssueDate        string  `json:"issueDate"`
-	ExpiryDate       string  `json:"expiryDate"`
-	AddressLine1     string  `json:"addressLine1"`
-	AddressLine2     string  `json:"addressLine2"`
-	City             string  `json:"city"`
-	State            string  `json:"state"`
-	ZipCode          string  `json:"zipCode"`
-	FrontIDImage     string  `json:"frontIdImage"`
-	BackIDImage      string  `json:"backIdImage"`
-	HoldIDImage      string  `json:"holdIdImage"`
-	PhoneNumber      *string `json:"phoneNumber,omitempty"`
-	PhoneCountryCode *string `json:"phoneCountryCode,omitempty"`
+	UserEmail        string `json:"userEmail"`
+	FirstName        string `json:"firstName"`
+	LastName         string `json:"lastName"`
+	DateOfBirth      string `json:"dateOfBirth"`
+	Gender           string `json:"gender"` // "male" | "female"
+	Nationality      string `json:"nationality"`
+	Type             string `json:"type"` // "ID_CARD" | "PASSPORT"
+	NationalID       string `json:"nationalId"`
+	IssueDate        string `json:"issueDate"`
+	ExpiryDate       string `json:"expiryDate"`
+	AddressLine1     string `json:"addressLine1"`
+	AddressLine2     string `json:"addressLine2"`
+	City             string `json:"city"`
+	State            string `json:"state"`
+	ZipCode          string `json:"zipCode"`
+	FrontIDImage     string `json:"frontIdImage"`
+	BackIDImage      string `json:"backIdImage"`
+	HoldIDImage      string `json:"holdIdImage"`
+	PhoneNumber      string `json:"phoneNumber,omitempty"`
+	PhoneCountryCode string `json:"phoneCountryCode,omitempty"`
 }
 
 type AlixResponse struct {
@@ -49,6 +49,7 @@ type AlixData struct {
 }
 
 type KYCRequestBody struct {
+	PartnerCode string `json:"partnerCode"`
 	SubmitKYCRequest
 	Signature string `json:"signature"`
 }
@@ -66,6 +67,7 @@ func (h *SubmitKYCHandle) SubmitKYC(ctx context.Context, req *SubmitKYCRequest) 
 	var alixResponse AlixResponse
 
 	requestBody := KYCRequestBody{
+		PartnerCode:      h.cfg.PartnerCode,
 		SubmitKYCRequest: *req,
 		Signature:        sig,
 	}
