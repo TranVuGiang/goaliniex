@@ -33,7 +33,7 @@ func newTestClient(t *testing.T) *goaliniex.Client {
 		ReplaceAttr: nil,
 	}))
 
-	client := goaliniex.NewClient(
+	client, err := goaliniex.NewClient(
 		"https://sandbox.alixpay.com",
 		partnerCode,
 		secretKey,
@@ -41,6 +41,9 @@ func newTestClient(t *testing.T) *goaliniex.Client {
 		goaliniex.WithDebug(true),
 		goaliniex.WithLogger(logger),
 	)
+	if err != nil {
+		t.Fatalf("failed to create client: %v", err)
+	}
 
 	return client
 }

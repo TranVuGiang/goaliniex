@@ -53,10 +53,10 @@ type SubmitKycResponse struct {
 func (c *Client) SubmitKyc(ctx context.Context, kycRequest *SubmitKycRequest) (*Response[SubmitKycResponse], error) {
 	signaturePayload := fmt.Sprintf(
 		"%s|%s|%s|%s",
-		c.PartnerCode,
+		c.partnerCode,
 		kycRequest.UserEmail,
 		kycRequest.Nationality,
-		c.SecretKey,
+		c.secretKey,
 	)
 
 	apiRequest := request{
