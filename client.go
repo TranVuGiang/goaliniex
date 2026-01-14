@@ -68,7 +68,7 @@ func WithDebug(debug bool) Option {
 	}
 }
 
-func WithHTTPClient(client *http.Client) Option {
+func WithHTTPClient(client HTTPClient) Option {
 	return func(c *Client) {
 		c.HTTPClient = client
 	}
