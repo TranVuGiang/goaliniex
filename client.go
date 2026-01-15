@@ -16,6 +16,12 @@ import (
 const UserAgent = "aliniex-go-sdk"
 
 var (
+	// Client initialization errors.
+	ErrEmptyBaseURL     = errors.New("baseURL is required")
+	ErrEmptyPartnerCode = errors.New("partnerCode is required")
+	ErrEmptySecretKey   = errors.New("secretKey is required")
+	ErrEmptyPrivateKey  = errors.New("privateKey is required")
+
 	// Request lifecycle errors.
 	ErrNilRequest    = errors.New("request is nil")
 	ErrRequestBuild  = errors.New("failed to build request")
@@ -41,36 +47,36 @@ type HTTPClient interface {
 type Option func(*Client)
 
 type Client struct {
-	BaseURL     string
-	PartnerCode string
-	SecretKey   string
-	PrivateKey  []byte
-	Logger      Logger
-	Debug       bool
-	HTTPClient  HTTPClient
+	baseURL     string
+	partnerCode string
+	secretKey   string
+	privateKey  []byte
+	logger      Logger
+	debug       bool
+	httpClient  HTTPClient
 }
 
 func WithBaseURL(url string) Option {
 	return func(c *Client) {
-		c.BaseURL = url
+		c.baseURL = url
 	}
 }
 
 func WithLogger(logger Logger) Option {
 	return func(c *Client) {
-		c.Logger = logger
+		c.logger = logger
 	}
 }
 
 func WithDebug(debug bool) Option {
 	return func(c *Client) {
-		c.Debug = debug
+		c.debug = debug
 	}
 }
 
-func WithHTTPClient(client *http.Client) Option {
+func WithHTTPClient(client HTTPClient) Option {
 	return func(c *Client) {
-		c.HTTPClient = client
+		c.httpClient = client
 	}
 }
 
@@ -80,27 +86,43 @@ func NewClient(
 	secretKey string,
 	privateKey []byte,
 	opts ...Option,
-) *Client {
+) (*Client, error) {
+	if baseURL == "" {
+		return nil, ErrEmptyBaseURL
+	}
+
+	if partnerCode == "" {
+		return nil, ErrEmptyPartnerCode
+	}
+
+	if secretKey == "" {
+		return nil, ErrEmptySecretKey
+	}
+
+	if len(privateKey) == 0 {
+		return nil, ErrEmptyPrivateKey
+	}
+
 	client := &Client{
-		BaseURL:     baseURL,
-		PartnerCode: partnerCode,
-		SecretKey:   secretKey,
-		PrivateKey:  privateKey,
-		HTTPClient:  http.DefaultClient,
-		Logger:      slog.Default(),
-		Debug:       false,
+		baseURL:     baseURL,
+		partnerCode: partnerCode,
+		secretKey:   secretKey,
+		privateKey:  privateKey,
+		httpClient:  http.DefaultClient,
+		logger:      slog.Default(),
+		debug:       false,
 	}
 
 	for _, opt := range opts {
 		opt(client)
 	}
 
-	return client
+	return client, nil
 }
 
-func (c *Client) debug(msg string, attrs ...any) {
-	if c.Debug {
-		c.Logger.Debug(msg, attrs...)
+func (c *Client) logDebug(msg string, attrs ...any) {
+	if c.debug {
+		c.logger.Debug(msg, attrs...)
 	}
 }
 
@@ -131,7 +153,7 @@ func (c *Client) buildRequest(req *request) error {
 		return ErrNilRequest
 	}
 
-	fullURL := c.BaseURL + req.Endpoint
+	fullURL := c.baseURL + req.Endpoint
 
 	headers := http.Header{}
 	if req.Header != nil {
@@ -141,7 +163,7 @@ func (c *Client) buildRequest(req *request) error {
 	headers.Set("Content-Type", "application/json")
 	headers.Set("User-Agent", UserAgent)
 
-	signature, err := signer.Sign(c.PrivateKey, req.SigningData)
+	signature, err := signer.Sign(c.privateKey, req.SigningData)
 	if err != nil {
 		return fmt.Errorf("%w: %w", ErrRequestSign, err)
 	}
@@ -151,7 +173,7 @@ func (c *Client) buildRequest(req *request) error {
 		return fmt.Errorf("%w: %w", ErrInvalidParams, err)
 	}
 
-	bodyMap["partnerCode"] = c.PartnerCode
+	bodyMap["partnerCode"] = c.partnerCode
 	bodyMap["signature"] = signature
 
 	bodyBytes, err := json.Marshal(bodyMap)
@@ -159,8 +181,8 @@ func (c *Client) buildRequest(req *request) error {
 		return fmt.Errorf("%w: %w", ErrRequestEncode, err)
 	}
 
-	c.debug("http request", "url", fullURL)
-	c.debug("http request body", "body", string(bodyBytes))
+	c.logDebug("http request", "url", fullURL)
+	c.logDebug("http request body", "body", string(bodyBytes))
 
 	req.FullURL = fullURL
 	req.Header = headers
@@ -186,7 +208,7 @@ func (c *Client) execute(ctx context.Context, req *request) ([]byte, error) {
 
 	httpReq.Header = req.Header
 
-	resp, err := c.HTTPClient.Do(httpReq)
+	resp, err := c.httpClient.Do(httpReq)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", ErrHTTPFailure, err)
 	}
@@ -198,8 +220,8 @@ func (c *Client) execute(ctx context.Context, req *request) ([]byte, error) {
 		return nil, err
 	}
 
-	c.debug("http response", "status", resp.StatusCode)
-	c.debug("http response body", "body", string(responseBody))
+	c.logDebug("http response", "status", resp.StatusCode)
+	c.logDebug("http response body", "body", string(responseBody))
 
 	if resp.StatusCode >= http.StatusBadRequest {
 		return nil, fmt.Errorf(

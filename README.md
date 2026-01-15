@@ -32,13 +32,16 @@ go get github.com/TranVuGiang/goaliniex
 ## 🚀 Quick Start
 
 ```go
-client := goaliniex.NewClient(
+client, err := goaliniex.NewClient(
     "https://api.aliniex.com",
     partnerCode,
     secretKey,
     privateKeyPEM,
     goaliniex.WithDebug(true),
 )
+if err != nil {
+    log.Fatal(err)
+}
 
 resp, err := client.GetKycInformation(
     context.Background(),

@@ -34,9 +34,9 @@ type KycInformation struct {
 func (c *Client) GetKycInformation(ctx context.Context, kycRequest *KycInformationRequest) (*Response[KycInformation], error) {
 	signaturePayload := fmt.Sprintf(
 		"%s|%s|%s",
-		c.PartnerCode,
+		c.partnerCode,
 		kycRequest.UserEmail,
-		c.SecretKey,
+		c.secretKey,
 	)
 
 	apiRequest := request{
@@ -54,10 +54,10 @@ func (c *Client) GetKycInformation(ctx context.Context, kycRequest *KycInformati
 		return nil, err
 	}
 
-	kycResponse := new(Response[KycInformation])
-	if err := json.Unmarshal(rawResponse, kycResponse); err != nil {
+	response := new(Response[KycInformation])
+	if err := json.Unmarshal(rawResponse, response); err != nil {
 		return nil, err
 	}
 
-	return kycResponse, nil
+	return response, nil
 }
