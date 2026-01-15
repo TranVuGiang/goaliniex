@@ -54,10 +54,10 @@ func (c *Client) GetKycInformation(ctx context.Context, kycRequest *KycInformati
 		return nil, err
 	}
 
-	kycResponse := new(Response[KycInformation])
-	if err := json.Unmarshal(rawResponse, kycResponse); err != nil {
+	response := new(Response[KycInformation])
+	if err := json.Unmarshal(rawResponse, response); err != nil {
 		return nil, err
 	}
 
-	return kycResponse, nil
+	return response, nil
 }
